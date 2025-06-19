@@ -1,50 +1,24 @@
-#include <Arduino.h>
-#include <DFRobotDFPlayerMini.h>
-// Distance threshold (cm)
-const int threshold = 25;
-// DFPlayer & Serial
-HardwareSerial dfSerial(2);
-DFRobotDFPlayerMini player;
-#define Trig 22
-#define Echo 23
-void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(115200);
-  pinMode(Trig,OUTPUT);
-  pinMode(Echo,INPUT);
-  
-  dfSerial.begin(9600, SERIAL_8N1, 18, 19);//Rx,Tx pins for DFDminPlayer
-   if (!player.begin(dfSerial)) {
-    Serial.println("DFPlayer init failed!");
-    while (1);
-  }
-  player.volume(25); // set volume (0–30)
-  Serial.println("Setup complete");
-}
+# Distance_measureAlarm
 
-void loop() {
-  // main code here, to run repeatedly:
-  digitalWrite(Trig, LOW);
-  delayMicroseconds(2);
-  digitalWrite(Trig, HIGH);
-    delayMicroseconds(10);
-  digitalWrite(Trig, LOW);
- unsigned long duration = pulseIn(Echo, HIGH);
-  float distance=duration*0.034/2;
-  Serial.print("Distance: ");
-  Serial.println(distance);
-Serial.print("cm");
-  if(distance > 0 && distance < threshold){
-     Serial.printf("Detected @ %.1f cm → PLAY\n", distance);
-      player.play(3);
-  }
-  else{
-  Serial.println("Object left range — stopping");
-    player.stop();
-    }
-  delay(200);
-}
+ESP32 + HC‑SR04 ultrasonic alarm: continuous MP3 playback via DFPlayer Mini when object is within 40 cm.
 
-
-
-
+## ✨ Features
+- Distance detection from 2 cm to ~400 cm  
+- Triggers continuous playback when object is nearby  
+- Stops playback when the object moves away  
+- Adjustable threshold and audio track  
+==========================================================================================================================
+## 📋 Hardware Setup
+- ESP32 Dev Board  
+- HC-SR04 Ultrasonic Sensor  
+- DFPlayer Mini MP3 Module  
+- Micro SD card (with cat sound file)  
+- Speaker  
+- Jumper wires, Breadboard, Power supply
+=======================================================================================================================================
+## 🏁 Quick Start
+1. Clone the repo  
+2. Copy `0003.mp3` to `/mp3/` on the SD card  
+3. Wire ESP32 + HC-SR04 + DFPlayer as described above  
+4. Upload the sketch, open Serial Monitor at 115200 baud  
+5. Move an object close (<25 cm) to trigger audio  
