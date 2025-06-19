@@ -1,21 +1,50 @@
-##  Distance Measurement Alarm
+#include <Arduino.h>
+#include <DFRobotDFPlayerMini.h>
+// Distance threshold (cm)
+const int threshold = 25;
+// DFPlayer & Serial
+HardwareSerial dfSerial(2);
+DFRobotDFPlayerMini player;
+#define Trig 22
+#define Echo 23
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(115200);
+  pinMode(Trig,OUTPUT);
+  pinMode(Echo,INPUT);
+  
+  dfSerial.begin(9600, SERIAL_8N1, 18, 19);//Rx,Tx pins for DFDminPlayer
+   if (!player.begin(dfSerial)) {
+    Serial.println("DFPlayer init failed!");
+    while (1);
+  }
+  player.volume(25); // set volume (0–30)
+  Serial.println("Setup complete");
+}
 
-ESP32 + HC‑SR04 ultrasonic alarm: continuous MP3 playback via DFPlayer Mini when object is within 40 cm.
----
+void loop() {
+  // main code here, to run repeatedly:
+  digitalWrite(Trig, LOW);
+  delayMicroseconds(2);
+  digitalWrite(Trig, HIGH);
+    delayMicroseconds(10);
+  digitalWrite(Trig, LOW);
+ unsigned long duration = pulseIn(Echo, HIGH);
+  float distance=duration*0.034/2;
+  Serial.print("Distance: ");
+  Serial.println(distance);
+Serial.print("cm");
+  if(distance > 0 && distance < threshold){
+     Serial.printf("Detected @ %.1f cm → PLAY\n", distance);
+      player.play(3);
+  }
+  else{
+  Serial.println("Object left range — stopping");
+    player.stop();
+    }
+  delay(200);
+}
 
-## 🔌 Hardware Required
 
-- ESP32 Dev Board  
-- HC-SR04 Ultrasonic Sensor  
-- DFPlayer Mini MP3 Module  
-- Micro SD card (with cat sound file)  
-- Speaker  
-- Jumper wires, Breadboard, Power supply
 
-## 🌸 Features
-
-- Measures distance from 2 cm to ~400 cm using HC-SR04
-- Triggers continuous audio playback while an object is nearby (< 40 cm)
-- Stops playback once the object moves away
-- Adjustable distance threshold and audio track
 
